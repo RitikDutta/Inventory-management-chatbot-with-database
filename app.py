@@ -54,9 +54,11 @@ def get_user_name_word(uname):
 
 def add_user_word(name, age, address, mobile):
     current = 0
+    fullmessage = ''
     if is_user_present(name):
         print('{} alreaddy present in our database assigning u new user name'.format(name))
         pkey = get_user_name_word(name)
+        message = '{} alreaddy present in our database assigning u new user name \n'.format(name)
     else:
         pkey = name
     data = {
@@ -68,7 +70,8 @@ def add_user_word(name, age, address, mobile):
     }
     ref.child('customers').child(pkey).set(data)
     print('{} is your user id please remember userid for next purchace'.format(pkey))
-    return pkey
+    fullmessage += message+"{} is your user id please remember userid for next purchace\n".format(pkey)
+    return fullmessage
 
 
 
@@ -90,11 +93,95 @@ def webhook():
     req = request.get_json(silent =True, force=True)
     params = req['queryResult']['parameters']
     pprint(req['queryResult']['intent'])
-    speech = {'fulfillmentText': 'This is a response from webhook.'}
+    pprint(params)
+    # pprint(req['queryResult'])
+
+
+
+
+
+
+
+
+
+    speech = {
+
+    "fulfillmentText": "Hello! How can I help you?",
+    "fulfillmentMessages": [
+      
+     {
+        "payload": {
+          "richContent": [
+            [
+              {
+                "type": "image",
+                "rawUrl": "https://5.imimg.com/data5/QR/AN/MY-5742893/maggi-noodle-250x250.jpg",
+                "accessibilityText": "MBD Image"
+              }
+            ]
+          ]
+        },
+        "platform": "TELEGRAM"
+      },
+      {
+        "text": {
+          "text": [
+            "here ur image"
+          ]
+        },
+        "platform": "TELEGRAM"
+      },
+      {
+        "image": {
+          "imageUri": "https://mybigplunge.com/wp-content/uploads/2015/11/Maggie-is-back-1.jpg"
+        },
+        "platform": "TELEGRAM"
+      },
+      {
+        "text": {
+          "text": [
+            ""
+          ]
+        }
+      },
+      {
+        "payload": {
+          "richContent": [
+            [
+              {
+                "type": "image",
+                "rawUrl": "https://5.imimg.com/data5/QR/AN/MY-5742893/maggi-noodle-250x250.jpg",
+                "accessibilityText": "MBD Image"
+              }
+            ]
+          ]
+        }
+      }
+    ],
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     if req['queryResult']['intent']['displayName'] == 'get details':
-        uname = add_user_word(params['person']['name'], params["age"]["amount"], params["street-address"], params["phone-number"])
-        speech = {'fulfillmentText': '{} is your user name please remember it for future purchaces'.format(uname)}
+        message = add_user_word(params['person']['name'], params["age"]["amount"], params["street-address"], params["phone-number"])
+        speech = {'fulfillmentText': message}
   
     return make_response(jsonify(speech))
 
