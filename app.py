@@ -74,8 +74,96 @@ def add_user_word(name, age, address, mobile):
     return fullmessage
 
 
+def get_product(product, pack=1):
+    pprint(ref.child('products').child(product).child("{}_pack_{}".format(pack,product)).get())
+    data = ref.child('products').child(product).child("{}_pack_{}".format(pack,product)).get()
+    speech = {
 
-
+        "fulfillmentText": data['name'],
+        "fulfillmentMessages": [
+          
+          {
+            "text": {
+              "text": [
+                data['name']
+              ]
+            },
+            "platform": "TELEGRAM"
+          },
+          {
+            "image": {
+              "imageUri": data["image_link"]
+            },
+            "platform": "TELEGRAM"
+          },
+          {
+            "text": {
+              "text": [
+                data['discription']
+              ]
+            },
+            "platform": "TELEGRAM"
+          },
+          {
+            "text": {
+              "text": [
+                "Price: {}".format(data["price"])
+              ]
+            },
+            "platform": "TELEGRAM"
+          },
+          {
+            "text": {
+              "text": [
+                "{} left in stock".format(data["quantity"])
+              ]
+            },
+            "platform": "TELEGRAM"
+          },
+          {
+            "text": {
+              "text": [
+                ""
+              ]
+            }
+          },
+          {
+            "payload": {
+              "richContent": [
+                [
+                  {
+                    "type": "image",
+                    "rawUrl": data["image_link"],
+                    "accessibilityText": "MBD Image"
+                  }
+                ]
+              ]
+            }
+          },
+          {
+            "text": {
+              "text": [
+                data["discription"]
+              ]
+            }
+          },
+          {
+            "text": {
+              "text": [
+                    "Price: {}".format(data["price"])
+              ]
+            }
+          },
+          {
+            "text": {
+              "text": [
+                    "{} left in stock".format(data["quantity"])
+              ]
+            }
+          },
+        ],
+      }
+    return speech
 
 
 
@@ -95,88 +183,16 @@ def webhook():
     pprint(req['queryResult']['intent'])
     pprint(params)
     # pprint(req['queryResult'])
+    speech = {"fulfillmentText": "Hello! How can I help you?"}
 
 
 
 
 
-
-
-
-
-    speech = {
-
-    "fulfillmentText": "Hello! How can I help you?",
-    "fulfillmentMessages": [
-      
-     {
-        "payload": {
-          "richContent": [
-            [
-              {
-                "type": "image",
-                "rawUrl": "https://5.imimg.com/data5/QR/AN/MY-5742893/maggi-noodle-250x250.jpg",
-                "accessibilityText": "MBD Image"
-              }
-            ]
-          ]
-        },
-        "platform": "TELEGRAM"
-      },
-      {
-        "text": {
-          "text": [
-            "here ur image"
-          ]
-        },
-        "platform": "TELEGRAM"
-      },
-      {
-        "image": {
-          "imageUri": "https://mybigplunge.com/wp-content/uploads/2015/11/Maggie-is-back-1.jpg"
-        },
-        "platform": "TELEGRAM"
-      },
-      {
-        "text": {
-          "text": [
-            ""
-          ]
-        }
-      },
-      {
-        "payload": {
-          "richContent": [
-            [
-              {
-                "type": "image",
-                "rawUrl": "https://5.imimg.com/data5/QR/AN/MY-5742893/maggi-noodle-250x250.jpg",
-                "accessibilityText": "MBD Image"
-              }
-            ]
-          ]
-        }
-      }
-    ],
-  }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    if req['queryResult']['intent']['displayName'] == 'get product details':
+        product = params['products']
+        speech = get_product(product)
+        
 
 
     if req['queryResult']['intent']['displayName'] == 'get details':
