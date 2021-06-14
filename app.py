@@ -180,11 +180,33 @@ def webhook():
 
     req = request.get_json(silent =True, force=True)
     params = req['queryResult']['parameters']
+    print('*'*20)
     pprint(req['queryResult']['intent'])
     pprint(params)
-    # pprint(req['queryResult'])
     speech = {"fulfillmentText": "Hello! How can I help you?"}
 
+
+
+    if req['queryResult']['intent']['displayName'] == 'get user name':
+      print("{} {}".format(params['prename'], params['person']['name']))
+      if is_user_present("{} {}".format(params['prename'], params['person']['name'])):
+        speech = {"fulfillmentText": "{} {} please add your orders".format(params['prename'], params['person']['name'])}
+      else:
+        print("{} {} not present \n plesae enter correct name or create account".format(params['prename'], params['person']['name']))
+        speech = {"fulfillmentText": "{} {} not present \n plesae enter correct name or create account".format(params['prename'], params['person']['name'])}
+
+
+
+    if req['queryResult']['intent']['displayName'] == 'add order':
+      order_params = req['queryResult']['outputContexts'][0]['parameters']
+      if len(order_params['number']) == 0:
+        no_items = 1
+      else:
+        no_items = int(order_params['number'][0])
+      pprint(order_params)
+      print(len(order_params['number']))
+      print("{} {} orders ".format(order_params['prename'], order_params['person']['name']))
+      print("{} {}".format(no_items, order_params['products'][0]))
 
 
 
