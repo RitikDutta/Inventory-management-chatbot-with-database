@@ -74,6 +74,38 @@ def add_user_word(name, age, address, mobile):
     return fullmessage
 
 
+
+def is_product_available(product, pack=1):
+    data = ref.child('products').child(product).child("{}_pack_{}".format(pack, product)).get()
+#     pprint(data)
+    if not bool(data):
+        print("product not available")
+        quantity=0
+        price = 0
+    else:
+        quantity = data['quantity']
+        price = data['price']
+        print(quantity, price)
+    return quantity, price
+
+
+def add_order_dict(name, product, quantity=1):
+  if is_product_available(product)[0] >0:
+    user = ref.child('customers').child(name).get()
+    current_order = user['current_order']
+    orders = user['order{}'.format(current_order)]
+    orders[product] = orders.get(product, 0) + quantity
+    user['order{}'.format(current_order)].update(orders)
+    ref.child('customers').child(name).update(user)
+    pprint(user)
+  else:
+    pprint("not applicable")
+
+
+
+
+
+
 def get_product(product, pack=1):
     pprint(ref.child('products').child(product).child("{}_pack_{}".format(pack,product)).get())
     data = ref.child('products').child(product).child("{}_pack_{}".format(pack,product)).get()
@@ -183,12 +215,14 @@ def webhook():
     print('*'*20)
     pprint(req['queryResult']['intent'])
     pprint(params)
+    # pprint(req['queryResult']['outputContexts'][0]['parameters'])
     speech = {"fulfillmentText": "Hello! How can I help you?"}
 
 
 
     if req['queryResult']['intent']['displayName'] == 'get user name':
       print("{} {}".format(params['prename'], params['person']['name']))
+      pprint(params)
       if is_user_present("{} {}".format(params['prename'], params['person']['name'])):
         speech = {"fulfillmentText": "{} {} please add your orders".format(params['prename'], params['person']['name'])}
       else:
@@ -198,15 +232,19 @@ def webhook():
 
 
     if req['queryResult']['intent']['displayName'] == 'add order':
+      pprint(req['queryResult']['outputContexts'][0]['parameters'])
+      print('+'*20)
+      pprint(params)
       order_params = req['queryResult']['outputContexts'][0]['parameters']
       if len(order_params['number']) == 0:
         no_items = 1
       else:
         no_items = int(order_params['number'][0])
-      pprint(order_params)
-      print(len(order_params['number']))
-      print("{} {} orders ".format(order_params['prename'], order_params['person']['name']))
-      print("{} {}".format(no_items, order_params['products'][0]))
+      # pprint(order_params)
+      # print(len(order_params['number']))
+      # print("{} {} orders ".format(order_params['prename'], order_params['person']['name']))
+      # print("{} {}".format(no_items, order_params['products'][0]))
+      add_order_dict("{} {}".format(order_params['prename'], order_params['person']['name']), order_params['products'][0], no_items)
 
 
 
