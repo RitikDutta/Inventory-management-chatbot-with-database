@@ -102,6 +102,19 @@ def add_order_dict(name, product, quantity=1):
     pprint("not applicable")
 
 
+def get_all_orders(name):
+    text = ''
+    total = 0
+    user = ref.child('customers').child(name).get()
+    current_order = user['current_order']
+    orders = user['order{}'.format(current_order)]
+    text+='quantity\tproduct\tprice\ttotal\n'
+    for a in orders:
+        text+='{}\t\t{}\t{}\t{}'.format(orders[a], a, is_product_available(a)[1], is_product_available('maggie')[1]*orders[a])
+        text+='\n'
+        total+=is_product_available('maggie')[1]*orders[a]
+    text+='\nyour total is: {}'.format(total)
+    return text
 
 
 
@@ -232,7 +245,8 @@ def webhook():
 
 
     if req['queryResult']['intent']['displayName'] == 'test 23':
-      speech = {"fulfillmentText": "4\t\tmaggie\t\t4rs\t\t40rs\n40\t\tpasta\t\t12rs\t\t20rs"}
+      text = get_all_orders("cool ronit")
+      speech = {"fulfillmentText": text}
 
 
 
