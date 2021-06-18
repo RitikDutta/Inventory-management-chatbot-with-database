@@ -90,7 +90,7 @@ def is_product_available(product, pack=1):
 
 
 def add_order_dict(name, product, quantity=1):
-  if is_product_available(product)[0] >0:
+  if is_product_available(product)[0] >= quantity:
     user = ref.child('customers').child(name).get()
     current_order = user['current_order']
     orders = user['order{}'.format(current_order)]
@@ -231,11 +231,17 @@ def webhook():
 
 
 
+    if req['queryResult']['intent']['displayName'] == 'test 23':
+      speech = {"fulfillmentText": "4\t\tmaggie\t\t4rs\t\t40rs\n40\t\tpasta\t\t12rs\t\t20rs"}
+
+
+
     if req['queryResult']['intent']['displayName'] == 'add order':
-      pprint(req['queryResult']['outputContexts'][0]['parameters'])
+      pprint(req['queryResult']['outputContexts'])
       print('+'*20)
       pprint(params)
-      order_params = req['queryResult']['outputContexts'][0]['parameters']
+      order_params = req['queryResult']['outputContexts'][1]['parameters']
+      prename_params = req['queryResult']['outputContexts']
       if len(order_params['number']) == 0:
         no_items = 1
       else:
@@ -244,8 +250,25 @@ def webhook():
       # print(len(order_params['number']))
       # print("{} {} orders ".format(order_params['prename'], order_params['person']['name']))
       # print("{} {}".format(no_items, order_params['products'][0]))
-      add_order_dict("{} {}".format(order_params['prename'], order_params['person']['name']), order_params['products'][0], no_items)
-
+      try:
+        prename = req['queryResult']['outputContexts'][0]['parameters']['prename']
+        name = req['queryResult']['outputContexts'][0]['parameters']['person']['name']
+        print(prename, name)
+        print('started on one go')
+        # pprint(prename, name)
+      except KeyError:
+        prename = req['queryResult']['outputContexts'][1]['parameters']['prename']
+        name = req['queryResult']['outputContexts'][1]['parameters']['person']['name']
+        print('exception handelled')
+      except KeyError:
+        prename = req['queryResult']['outputContexts'][2]['parameters']['prename']
+        name = req['queryResult']['outputContexts'][2]['parameters']['person']['name']
+        print('exception handelled')
+      except KeyError:
+        prename = req['queryResult']['outputContexts'][3]['parameters']['prename']
+        name = req['queryResult']['outputContexts'][3]['parameters']['person']['name']
+        print('exception handelled')
+      add_order_dict("{} {}".format(prename, name), order_params['products'][0], no_items)
 
 
 
