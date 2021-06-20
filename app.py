@@ -90,30 +90,52 @@ def is_product_available(product, pack=1):
 
 
 def add_order_dict(name, product, quantity=1):
+  text = ''
   if is_product_available(product)[0] >= quantity:
     user = ref.child('customers').child(name).get()
     current_order = user['current_order']
     orders = user['order{}'.format(current_order)]
     orders[product] = orders.get(product, 0) + quantity
+    orders['total']+=is_product_available(product)[1]
     user['order{}'.format(current_order)].update(orders)
     ref.child('customers').child(name).update(user)
     pprint(user)
+    text = '{} {} added'.format(quantity, product)
   else:
     pprint("not applicable")
+    text = 'sorry this item is unavailable'
+  return text
 
 
-def get_all_orders(name):
-    text = ''
+
+
+
+# def get_all_orders(name):
+#     text = ''
+#     total = 0
+#     user = ref.child('customers').child(name).get()
+#     current_order = user['current_order']
+#     orders = user['order{}'.format(current_order)]
+#     text+='quantity\tproduct\tprice\ttotal\n'
+#     for a in orders:
+#         text+='{}\t\t{}\t{}\t{}'.format(orders[a], a, is_product_available(a)[1], is_product_available('maggie')[1]*orders[a])
+#         text+='\n'
+#         total+=is_product_available('maggie')[1]*orders[a]
+#     text+='\nyour total is: {}'.format(total)
+#     return text
+
+
+def get_all_orders2(name):
+    text = 'Your orders are:-'
     total = 0
     user = ref.child('customers').child(name).get()
     current_order = user['current_order']
     orders = user['order{}'.format(current_order)]
-    text+='quantity\tproduct\tprice\ttotal\n'
     for a in orders:
-        text+='{}\t\t{}\t{}\t{}'.format(orders[a], a, is_product_available(a)[1], is_product_available('maggie')[1]*orders[a])
-        text+='\n'
-        total+=is_product_available('maggie')[1]*orders[a]
-    text+='\nyour total is: {}'.format(total)
+        if a=='total':
+            continue
+        text += '\n{} {}"(s)"'.format(orders[a], a)
+    text+='\nYour total is {}'.format(orders['total'])
     return text
 
 
@@ -222,7 +244,7 @@ def index():
 
 @app.route('/webhook', methods=['POST'], )
 def webhook():
-
+    texty = ''
     req = request.get_json(silent =True, force=True)
     params = req['queryResult']['parameters']
     print('*'*20)
@@ -243,10 +265,8 @@ def webhook():
         speech = {"fulfillmentText": "{} {} not present \n plesae enter correct name or create account".format(params['prename'], params['person']['name'])}
 
 
-
     if req['queryResult']['intent']['displayName'] == 'test 23':
-      text = get_all_orders("cool ronit")
-      speech = {"fulfillmentText": text}
+      text = get_all_orders2("cool ronit")
 
 
 
@@ -282,7 +302,10 @@ def webhook():
         prename = req['queryResult']['outputContexts'][3]['parameters']['prename']
         name = req['queryResult']['outputContexts'][3]['parameters']['person']['name']
         print('exception handelled')
-      add_order_dict("{} {}".format(prename, name), order_params['products'][0], no_items)
+      except KeyError:
+        text = "something went wrong may be app is in testing phases"
+
+      text = add_order_dict("{} {}".format(prename, name), order_params['products'][0], no_items)
 
 
 
@@ -295,7 +318,8 @@ def webhook():
     if req['queryResult']['intent']['displayName'] == 'get details':
         message = add_user_word(params['person']['name'], params["age"]["amount"], params["street-address"], params["phone-number"])
         speech = {'fulfillmentText': message}
-  
+    
+    speech = {'fulfillmentText': text}
     return make_response(jsonify(speech))
 
 if __name__ == '__main__':
