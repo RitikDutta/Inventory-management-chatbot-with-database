@@ -347,7 +347,7 @@ def webhook():
                         "text": "Check Cart"
                       },
                       {
-                        "text": "Confirm Order"
+                        "text": "Confirm"
                       }
                     ]
                   }
@@ -361,7 +361,7 @@ def webhook():
               "title": "Please add next item",
               "quickReplies": [
                 "Check Cart",
-                "Confirm Order"
+                "Confirm"
               ]
             },
             "platform": "TELEGRAM"
@@ -383,7 +383,7 @@ def webhook():
                         "text": "Check Cart"
                       },
                       {
-                        "text": "Confirm Order"
+                        "text": "Confirm"
                       }
                     ],
                     "type": "chips"
@@ -401,30 +401,30 @@ def webhook():
 
 
     if req['queryResult']['intent']['displayName'] == 'check cart' or req['queryResult']['intent']['displayName'] == 'order prompt':
-
+      pprint(req['queryResult'])
       try:
-        prename = req['queryResult']['outputContexts'][0]['parameters']['prename']
-        name = req['queryResult']['outputContexts'][0]['parameters']['person']['name']
+        prename = req['queryResult']['outputContexts'][1]['parameters']['prename']
+        name = req['queryResult']['outputContexts'][1]['parameters']['person']['name']
         print(prename, name)
         print('started on one go')
         text = get_all_orders2('{} {}'.format(prename, name))
         speech = {"fulfillmentText": text}
       except KeyError:
-        prename = req['queryResult']['outputContexts'][1]['parameters']['prename']
-        name = req['queryResult']['outputContexts'][1]['parameters']['person']['name']
-        print('exception handelled')
-        text = get_all_orders2('{} {}'.format(prename, name))
-        speech = {"fulfillmentText": text}
-      except KeyError:
         prename = req['queryResult']['outputContexts'][2]['parameters']['prename']
         name = req['queryResult']['outputContexts'][2]['parameters']['person']['name']
-        print('exception handelled')
+        print('exception handelled 1')
         text = get_all_orders2('{} {}'.format(prename, name))
         speech = {"fulfillmentText": text}
       except KeyError:
         prename = req['queryResult']['outputContexts'][3]['parameters']['prename']
         name = req['queryResult']['outputContexts'][3]['parameters']['person']['name']
-        print('exception handelled')
+        print('exception handelled 2')
+        text = get_all_orders2('{} {}'.format(prename, name))
+        speech = {"fulfillmentText": text}
+      except KeyError:
+        prename = req['queryResult']['outputContexts'][4]['parameters']['prename']
+        name = req['queryResult']['outputContexts'][4]['parameters']['person']['name']
+        print('exception handelled 3')
         text = get_all_orders2('{} {}'.format(prename, name))
         speech = {"fulfillmentText": text}
       except KeyError:
@@ -438,32 +438,28 @@ def webhook():
         speech = {'fulfillmentText': message}
     
     if req['queryResult']['intent']['displayName'] == 'order prompt - yes':
-      text = 'your order have been placed \nthankyou for shop whith us\nur order will deliver soon.'
       try:
-        prename = req['queryResult']['outputContexts'][0]['parameters']['prename']
-        name = req['queryResult']['outputContexts'][0]['parameters']['person']['name']
-        print(prename, name)
-        print('started on one go')
-        speech = {"fulfillmentText": text}
-      except KeyError:
         prename = req['queryResult']['outputContexts'][1]['parameters']['prename']
         name = req['queryResult']['outputContexts'][1]['parameters']['person']['name']
-        print('exception handelled')
-        speech = {"fulfillmentText": text}
+        print(prename, name)
+        print('started on one go')
       except KeyError:
         prename = req['queryResult']['outputContexts'][2]['parameters']['prename']
         name = req['queryResult']['outputContexts'][2]['parameters']['person']['name']
-        print('exception handelled')
-        speech = {"fulfillmentText": text}
+        print('exception handelled 1')
       except KeyError:
         prename = req['queryResult']['outputContexts'][3]['parameters']['prename']
         name = req['queryResult']['outputContexts'][3]['parameters']['person']['name']
-        print('exception handelled')
-        speech = {"fulfillmentText": text}
+        print('exception handelled 2')
+      except KeyError:
+        prename = req['queryResult']['outputContexts'][4]['parameters']['prename']
+        name = req['queryResult']['outputContexts'][4]['parameters']['person']['name']
+        print('exception handelled 3')
       except KeyError:
         text = "something went wrong may be app is in testing phases"
-      sub_product_main('{} {}'.format(prename, name))
+      text = 'your order have been placed \nthankyou for shop whith us\nur order will deliver soon.'
       speech = {"fulfillmentText": text}
+      ref.child('customers').child('{} {}'.format(prename, name)).update({'status': 'placed'})
     return make_response(jsonify(speech))
 
 if __name__ == '__main__':
