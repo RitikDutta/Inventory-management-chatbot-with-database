@@ -1,0 +1,62 @@
+[1mdiff --git a/add orders.ipynb b/add orders.ipynb[m
+[1mindex 4306a83..2ee00d7 100644[m
+[1m--- a/add orders.ipynb[m	
+[1m+++ b/add orders.ipynb[m	
+[36m@@ -62,7 +62,7 @@[m
+   },[m
+   {[m
+    "cell_type": "code",[m
+[31m-   "execution_count": 20,[m
+[32m+[m[32m   "execution_count": 4,[m
+    "id": "03f7b737",[m
+    "metadata": {},[m
+    "outputs": [],[m
+[36m@@ -515,7 +515,7 @@[m
+   },[m
+   {[m
+    "cell_type": "code",[m
+[31m-   "execution_count": 124,[m
+[32m+[m[32m   "execution_count": 5,[m
+    "id": "f7df75a4",[m
+    "metadata": {},[m
+    "outputs": [],[m
+[36m@@ -536,7 +536,7 @@[m
+   },[m
+   {[m
+    "cell_type": "code",[m
+[31m-   "execution_count": 125,[m
+[32m+[m[32m   "execution_count": 6,[m
+    "id": "82d95f85",[m
+    "metadata": {},[m
+    "outputs": [[m
+[1mdiff --git a/app.py b/app.py[m
+[1mindex 40d47f6..d322143 100755[m
+[1m--- a/app.py[m
+[1m+++ b/app.py[m
+[36m@@ -244,7 +244,7 @@[m [mdef index():[m
+ [m
+ @app.route('/webhook', methods=['POST'], )[m
+ def webhook():[m
+[31m-    texty = ''[m
+[32m+[m[32m    text = ''[m
+     req = request.get_json(silent =True, force=True)[m
+     params = req['queryResult']['parameters'][m
+     print('*'*20)[m
+[36m@@ -306,7 +306,7 @@[m [mdef webhook():[m
+         text = "something went wrong may be app is in testing phases"[m
+ [m
+       text = add_order_dict("{} {}".format(prename, name), order_params['products'][0], no_items)[m
+[31m-[m
+[32m+[m[32m      speech = {'fulfillmentText': text}[m
+ [m
+ [m
+     if req['queryResult']['intent']['displayName'] == 'get product details':[m
+[36m@@ -319,7 +319,7 @@[m [mdef webhook():[m
+         message = add_user_word(params['person']['name'], params["age"]["amount"], params["street-address"], params["phone-number"])[m
+         speech = {'fulfillmentText': message}[m
+     [m
+[31m-    speech = {'fulfillmentText': text}[m
+[32m+[m[41m    [m
+     return make_response(jsonify(speech))[m
+ [m
+ if __name__ == '__main__':[m
