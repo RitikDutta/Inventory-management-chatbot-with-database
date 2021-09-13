@@ -251,7 +251,7 @@ def sub_product_main(name):
 def update_current_order(name):
   user = ref.child('customers').child(name).get()
   user.update({'current_order': user['current_order']+1})
-  ref.child('customers').child(name).update(data)
+  ref.child('customers').child(name).update(user)
 
 app = Flask(__name__)
 
