@@ -1,4 +1,5 @@
 from flask import Flask, request, make_response, jsonify
+from flask.globals import current_app
 import requests
 from flask import jsonify
 from flask import make_response
@@ -247,6 +248,10 @@ def sub_product_main(name):
         print(a, orders[a])
         sub_product(a, orders[a])
 
+def update_current_order(name):
+  user = ref.child('customers').child(name).get()
+  user.update({'current_order': user['current_order']+1})
+  ref.child('customers').child(name).update(data)
 
 app = Flask(__name__)
 
@@ -460,7 +465,8 @@ def webhook():
       text = 'your order have been placed \nthankyou for shop whith us\nur order will deliver soon.'
       speech = {"fulfillmentText": text}
       ref.child('customers').child('{} {}'.format(prename, name)).update({'status': 'placed'})
-      sub_product_main("{} {}".format(prename, name))
+      # sub_product_main("{} {}".format(prename, name))
+      update_current_order("{} {}".format(prename, name))
     return make_response(jsonify(speech))
 
 
