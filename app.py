@@ -459,7 +459,8 @@ def webhook():
         text = "something went wrong may be app is in testing phases"
       text = 'your order have been placed \nthankyou for shop whith us\nur order will deliver soon.'
       speech = {"fulfillmentText": text}
-      ref.child('customers').child('{} {}'.format(prename, name)).update({'status': 'placed'})
+      ref.child('customers').child('{} {}'.format(prename, name)).child().update({'status': 'placed'})
+      sub_product_main("{} {}".format(prename, name))
     return make_response(jsonify(speech))
 
 if __name__ == '__main__':
