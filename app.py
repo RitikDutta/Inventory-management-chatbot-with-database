@@ -95,7 +95,14 @@ def add_order_dict(name, product, quantity=1):
   if is_product_available(product)[0] >= quantity:
     user = ref.child('customers').child(name).get()
     current_order = user['current_order']
-    orders = user['order{}'.format(current_order)]
+    
+    # user = ref.child('customers').child(name).get()
+    # user.update({'order{}'.format(current_order): "1"})
+    try:
+      orders = user['order{}'.format(current_order)]
+    except KeyError:
+      ref.child('customers').child(name).child("order{}".format(current_order)).update({'total': is_product_available(product)[1]*quantity, product: quantity})
+      
     orders[product] = orders.get(product, 0) + quantity
     orders['total']+=is_product_available(product)[1]*quantity
     user['order{}'.format(current_order)].update(orders)
@@ -106,8 +113,6 @@ def add_order_dict(name, product, quantity=1):
     pprint("not applicable")
     text = 'sorry this item is unavailable'
   return text
-
-
 
 
 
@@ -439,7 +444,7 @@ def webhook():
       speech = {"fulfillmentText": text}
 
     if req['queryResult']['intent']['displayName'] == 'get details':
-        message = add_user_word(params['person']['name'], params["age"]["amount"], params["street-address"], params["phone-number"])
+        message = add_user_word(params['person']['name'], params["age"]["amount"], params["any"], params["phone-number"])
         speech = {'fulfillmentText': message}
     
     if req['queryResult']['intent']['displayName'] == 'order prompt - yes':
